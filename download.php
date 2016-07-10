@@ -4,6 +4,12 @@ $targetPath = __DIR__ . '/doc';
 if (!file_exists($targetPath)) {
     mkdir($targetPath, 0777, true);
 }
+$fh = fopen(__DIR__ . '/doc.csv', 'r');
+$base = array();
+$line = fgetcsv($fh, 2048);
+while($line = fgetcsv($fh, 2048)) {
+  $base[$line[0]] = $line;
+}
 $fh = fopen(__DIR__ . '/doc.csv', 'w');
 fputcsv($fh, array('id', 'file name', 'doc name'));
 for ($i = 1; $i <= 3; $i++) {
@@ -28,8 +34,15 @@ for ($i = 1; $i <= 3; $i++) {
                 if (!file_exists($targetFile)) {
                     file_put_contents($targetFile, file_get_contents('http://www.ttfd.gov.tw/?act=download&cmd=upload_file&id=' . $idFound));
                 }
+                if(isset($base[$idFound])) {
+                  unset($base[$idFound]);
+                }
                 fputcsv($fh, array($idFound, $fileName, "{$idFound}.{$p['extension']}"));
             }
         }
     }
+}
+
+foreach($base AS $line) {
+  fputcsv($fh, $line);
 }
